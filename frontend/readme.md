@@ -1,54 +1,36 @@
 # Frontend
 
-## Overview
+Static SPA built with HTML, CSS, and Vanilla JavaScript, served by Nginx.
 
-This is the frontend module of the microservices system. It provides the user interface and communicates with backend services through the API Gateway.
+## Run
 
-## Tech Stack
+Served by `nginx:alpine` on port `3000` inside Docker Compose.
 
-| Component        | Choice               |
-|------------------|----------------------|
-| Framework        | *(e.g., React, Vue, Angular, Svelte, plain HTML/JS)* |
-| Styling          | *(e.g., CSS, Tailwind, Bootstrap, Material UI)*       |
-| Package Manager  | *(e.g., npm, yarn, pnpm)*                             |
-| Build Tool       | *(e.g., Vite, Webpack, esbuild)*                      |
+## Main Routes
 
-## Getting Started
+- `#/auth`: customer login/register
+- `#/profile`: customer profile update
+- `#/`: customer menu browsing
+- `#/cart`: cart view
+- `#/checkout`: checkout form
+- `#/tracking`: order tracking by phone
+- `#/manager-auth`: manager login
+- `#/manager`: manager dashboard
 
-```bash
-# From project root
-docker compose up frontend --build
+## Features
 
-# Or run locally (adapt to your stack)
-cd src/
-# npm install && npm run dev
-# yarn && yarn dev
-```
+- Customer registration and login stored in browser session state
+- Customer profile editing
+- Menu browsing from `restaurant-service` data
+- Cart and checkout flow
+- Order tracking from `order-service` data
+- Manager dashboard:
+  - order summary
+  - status updates
+  - menu item edit
+  - menu availability toggle
+  - customer and report overview
 
-## Project Structure
+## API Rule
 
-```
-frontend/
-├── Dockerfile
-├── readme.md
-└── src/           # Your source code goes here
-```
-
-## Environment Variables
-
-| Variable       | Description                | Default                  |
-|----------------|----------------------------|--------------------------|
-| `API_BASE_URL` | URL of the API Gateway     | `http://localhost:8080`  |
-
-## Build for Production
-
-```bash
-# Example:
-# npm run build
-# yarn build
-```
-
-## Notes
-
-- All API calls should go through the **API Gateway** (`gateway`), not directly to individual services.
-- Configure proxy or API base URL to point to the gateway.
+All API calls use `/api/*` paths only through the gateway.
