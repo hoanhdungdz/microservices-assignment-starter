@@ -1,1 +1,0 @@
-# menu-service app package

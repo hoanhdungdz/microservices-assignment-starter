@@ -1,1 +1,0 @@
-# user-service app package
