@@ -1,47 +1,23 @@
-# ============================================
-# Makefile — Common project commands
-# Usage: make <target>
-# ============================================
+.PHONY: help init up down logs clean
 
-.PHONY: help up down build logs clean init
+help:
+	@echo "make init   - create .env from .env.example if missing"
+	@echo "make up     - build and start all containers"
+	@echo "make down   - stop all containers"
+	@echo "make logs   - view compose logs"
+	@echo "make clean  - stop containers and remove volumes"
 
-help: ## Show this help message
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+init:
+	@if [ ! -f .env ]; then cp .env.example .env; fi
 
-init: ## Initial setup — copy .env and build
-	@test -f .env || cp .env.example .env
-	@echo "Environment file ready."
-	docker compose build
-
-up: ## Start all services
+up:
 	docker compose up --build
 
-up-d: ## Start all services (detached)
-	docker compose up --build -d
-
-down: ## Stop all services
+down:
 	docker compose down
 
-build: ## Rebuild all containers
-	docker compose build --no-cache
-
-logs: ## Tail logs from all services
+logs:
 	docker compose logs -f
 
-logs-service: ## Tail logs from a specific service (usage: make logs-service s=service-a)
-	docker compose logs -f $(s)
-
-clean: ## Remove all containers, volumes, and images
-	docker compose down -v --rmi all --remove-orphans
-
-status: ## Show status of all services
-	docker compose ps
-
-restart: ## Restart all services
-	docker compose restart
-
-test: ## Run tests (customize per your stack)
-	@echo "Add your test commands here"
-	@echo "Example: docker compose exec service-a npm test"
-	@echo "Example: docker compose exec service-a pytest"
+clean:
+	docker compose down -v
