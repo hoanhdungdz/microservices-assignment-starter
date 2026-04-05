@@ -1,84 +1,151 @@
-# Project Name
+# FastBite Food Delivery Microservices
 
-[![Stars](https://img.shields.io/github/stars/hungdn1701/microservices-assignment-starter?style=social)](https://github.com/hungdn1701/microservices-assignment-starter/stargazers)
-[![Forks](https://img.shields.io/github/forks/hungdn1701/microservices-assignment-starter?style=social)](https://github.com/hungdn1701/microservices-assignment-starter/network/members)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## Team Information
 
-> Brief description of the business process being automated and the service-oriented solution.
+| Name                  | Student ID | Role | Contribution |
+| --------------------- | ---------- | ---- | ------------ |
+| Hồ Anh Dũng           | B22DCVT090 |      |              |
+| Nguyễn Hoàng Phan Anh | B22DCCN028 |      |              |
 
-> **New to this repo?** See [`GETTING_STARTED.md`](GETTING_STARTED.md) for setup instructions and workflow guide.
-
----
-
-## Team Members
-
-| Name | Student ID | Role | Contribution |
-|------|------------|------|-------------|
-|      |            |      |             |
-
----
-
-## Business Process
-
-*(Summarize the business process being automated — domain, actors, scope)*
-
----
-
-## Architecture
+## System Architecture
 
 ```mermaid
-graph LR
-    U[User] --> FE[Frontend :3000]
-    FE --> GW[API Gateway :8080]
-    GW --> SA[Service A :5001]
-    GW --> SB[Service B :5002]
-    SA --> DB1[(Database A)]
-    SB --> DB2[(Database B)]
+graph TD
+    User((User)) --> GW["API Gateway :8000"]
+    GW --> FE["Frontend :3000"]
+  GW --> US["User Service :8000"]
+  GW --> RS["Restaurant Service :8000"]
+  GW --> MS["Menu Service :8000"]
+  GW --> OS["Order Service :8000"]
+  US --> DB1[("user.db")]
+  RS --> DB2[("restaurant.db")]
+  MS --> DB3[("menu.db")]
+  OS --> DB4[("order.db")]
 ```
 
-| Component     | Responsibility | Tech Stack | Port |
-|---------------|----------------|------------|------|
-| **Frontend**  |                |            | 3000 |
-| **Gateway**   |                |            | 8080 |
-| **Service A** |                |            | 5001 |
-| **Service B** |                |            | 5002 |
+FastBite is a food delivery system built with a frontend SPA, an Nginx gateway, and four FastAPI microservices.
 
-> Full documentation: [`docs/architecture.md`](docs/architecture.md) · [`docs/analysis-and-design.md`](docs/analysis-and-design.md)
+## Project Structure
 
----
+```text
+.
+|-- README.md
+|-- .env.example
+|-- docker-compose.yml
+|-- Makefile
+|-- docs/
+|   |-- analysis-and-design.md
+|   |-- architecture.md
+|   |-- api-specs/
+|   `-- asset/
+|-- frontend/
+|-- gateway/
+|-- scripts/
+|-- services/
+|   |-- user-service/
+|   |-- restaurant-service/
+|   |-- menu-service/
+|   `-- order-service/
+`-- .ai/
+```
 
-## Getting Started
+## Main Features
+
+- Customer login, register, profile update, cart, checkout, and order tracking
+- Separate manager login and manager dashboard
+- User/account management through `user-service`
+- Restaurant management through `restaurant-service`
+- Menu management through `menu-service`
+- Order lifecycle management through `order-service`
+- Shared gateway entrypoint at `http://localhost:8000`
+
+## Services
+
+### Frontend
+
+- Static SPA served by Nginx
+- Customer routes:
+  - `#/auth`
+  - `#/profile`
+  - `#/`
+  - `#/cart`
+  - `#/checkout`
+  - `#/tracking`
+- Manager route:
+  - `#/manager-auth`
+  - `#/manager`
+
+### Gateway
+
+- Public entrypoint on port `8000`
+- Routes:
+  - `/` -> frontend
+  - `/users*` and `/api/users*` -> `user-service`
+  - `/api/auth*` -> `user-service`
+  - `/restaurants*` and `/api/restaurants*` -> `restaurant-service`
+  - `/menus*` -> `menu-service`
+  - `/orders*` and `/api/orders*` -> `order-service`
+  - `/api/menu-items*` (legacy compatibility) -> `menu-service`
+  - `/api/restaurants*` -> `restaurant-service`
+  - `/health` -> gateway health response
+
+### User Service
+
+- `GET /health`
+- `GET /users`
+- `POST /auth/register`
+- `POST /auth/login`
+
+### Restaurant Service
+
+- `GET /health`
+- `GET /restaurants`
+- `GET /restaurants/{restaurant_id}`
+- `POST /restaurants`
+
+### Menu Service
+
+- `GET /health`
+- `GET /menus`
+- `GET /menus/{menu_item_id}`
+- `POST /menus`
+- `PATCH /menus/{menu_item_id}`
+- `PATCH /menus/{menu_item_id}/availability`
+
+### Order Service
+
+- `GET /health`
+- `POST /orders`
+- `GET /orders`
+- `GET /orders/{order_id}`
+- `PATCH /orders/{order_id}/status`
+- `DELETE /orders/{order_id}`
+
+Order status flow:
+
+- `PENDING -> CONFIRMED -> PREPARING -> DELIVERING -> DELIVERED`
+- `CANCELLED` is allowed from `PENDING` or `CONFIRMED`
+
+## Run
 
 ```bash
-# Clone and initialize
-git clone <your-repo-url>
-cd <project-folder>
-cp .env.example .env
-
-# Build and run
 docker compose up --build
 ```
 
-### Verify
+Open:
 
-```bash
-curl http://localhost:8080/health   # Gateway
-curl http://localhost:5001/health   # Service A
-curl http://localhost:5002/health   # Service B
-```
+- App: `http://localhost:8000`
+- Manager: `http://localhost:8000/#/manager-auth`
 
----
+## Notes
 
-## API Documentation
+- Frontend calls backend only through `/api/*` on the gateway.
+- User, restaurant, menu, and order data are persisted in dedicated Docker volumes.
+- `restaurant-service` seeds default restaurant data on startup.
+- `menu-service` seeds default menu catalog data on startup.
 
-- [Service A — OpenAPI Spec](docs/api-specs/service-a.yaml)
-- [Service B — OpenAPI Spec](docs/api-specs/service-b.yaml)
+## Submission Checklist
 
----
-
-## License
-
-This project uses the [MIT License](LICENSE).
-
-> Template by [Hung Dang](https://github.com/hungdn1701) · [Template guide](GETTING_STARTED.md)
-
+- Update team member information if required by your class
+- Keep `docs/api-specs/` in sync with implementation
+- Keep `docs/analysis-and-design.md` and `docs/architecture.md` aligned with the final system
