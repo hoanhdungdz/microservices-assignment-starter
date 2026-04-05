@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Restaurant Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8002
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+  /restaurants:
+    get:
+      summary: List restaurants
+      responses:
+        "200":
+          description: Restaurant list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Restaurant"
+    post:
+      summary: Create restaurant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RestaurantCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+  /restaurants/{restaurant_id}:
+    get:
+      summary: Get restaurant by id
+      parameters:
+        - in: path
+          name: restaurant_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Restaurant details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+        "404":
+          description: Restaurant not found
+components:
+  schemas:
+    RestaurantCreate:
+      type: object
+      required: [name, address, phone, category]
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        category:
+          type: string
+    Restaurant:
+      allOf:
+        - $ref: "#/components/schemas/RestaurantCreate"
+        - type: object
+          required: [id, rating, created_at]
+          properties:
+            id:
+              type: string
+            rating:
+              type: number
+              format: float
+            created_at:
+              type: string
