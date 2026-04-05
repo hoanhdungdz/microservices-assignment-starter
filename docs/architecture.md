@@ -1,53 +1,78 @@
-# Architecture - Food Ordering System Microservices
+# System Architecture
 
-## Pattern Selection
+> This document is completed **after** [Analysis and Design](analysis-and-design.md).
+> Based on the Service Candidates and Non-Functional Requirements identified there, select appropriate architecture patterns and design the deployment architecture.
 
-| Pattern              | Selected | Note                                                                           |
-| -------------------- | -------- | ------------------------------------------------------------------------------ |
-| API Gateway          | YES      | Nginx is used as the single entry point for frontend requests.                 |
-| Database per Service | YES      | Each microservice manages its own data store independently.                    |
-| Shared Database      | NO       | Services do not directly share one database schema.                            |
-| Saga                 | NO       | Current use case is simple CRUD and does not require distributed transactions. |
-| Event-driven         | NO       | System currently uses synchronous REST communication.                          |
-| Circuit Breaker      | OPTIONAL | Can be added later for fault tolerance on inter-service calls.                 |
+**References:**
+1. *Service-Oriented Architecture: Analysis and Design for Services and Microservices* — Thomas Erl (2nd Edition)
+2. *Microservices Patterns: With Examples in Java* — Chris Richardson
+3. *Bài tập — Phát triển phần mềm hướng dịch vụ* — Hung Dang (available in Vietnamese)
 
-## System Components
+---
 
-| Component          | Responsibility                                    | Technology          | Port |
-| ------------------ | ------------------------------------------------- | ------------------- | ---- |
-| Frontend           | Customer interface for browsing and ordering food | HTML/CSS/JavaScript | 3000 |
-| Gateway (Nginx)    | Routes client requests to backend microservices   | Nginx               | 8080 |
-| user-service       | Manage user data                                  | FastAPI             | 8001 |
-| restaurant-service | Manage restaurant information                     | FastAPI             | 8002 |
-| menu-service       | Manage menu items for restaurants                 | FastAPI             | 8003 |
-| order-service      | Create and retrieve customer orders               | FastAPI             | 8004 |
+## 1. Pattern Selection
 
-## Communication Matrix
+Select patterns based on business/technical justifications from your analysis.
 
-| Source             | Target              | Protocol  | Purpose                                         |
-| ------------------ | ------------------- | --------- | ----------------------------------------------- |
-| Frontend           | Gateway             | HTTP/REST | Send all UI API calls through a single endpoint |
-| Gateway            | user-service        | HTTP/REST | Route `/users` related requests                 |
-| Gateway            | restaurant-service  | HTTP/REST | Route `/restaurants` related requests           |
-| Gateway            | menu-service        | HTTP/REST | Route `/menus` related requests                 |
-| Gateway            | order-service       | HTTP/REST | Route `/orders` related requests                |
-| user-service       | User Database       | SQL       | Persist and query user data                     |
-| restaurant-service | Restaurant Database | SQL       | Persist and query restaurant data               |
-| menu-service       | Menu Database       | SQL       | Persist and query menu item data                |
-| order-service      | Order Database      | SQL       | Persist and query order data                    |
+| Pattern | Selected? | Business/Technical Justification |
+|---------|-----------|----------------------------------|
+| API Gateway | | |
+| Database per Service | | |
+| Shared Database | | |
+| Saga | | |
+| Event-driven / Message Queue | | |
+| CQRS | | |
+| Circuit Breaker | | |
+| Service Registry / Discovery | | |
+| Other: ___ | | |
 
-## Architecture Diagram
+> Reference: *Microservices Patterns* — Chris Richardson, chapters on decomposition, data management, and communication patterns.
+
+---
+
+## 2. System Components
+
+| Component     | Responsibility | Tech Stack      | Port  |
+|---------------|----------------|-----------------|-------|
+| **Frontend**  |                | *(your choice)* | 3000  |
+| **Gateway**   |                | *(your choice)* | 8080  |
+| **Service A** |                | *(your choice)* | 5001  |
+| **Service B** |                | *(your choice)* | 5002  |
+| **Database**  |                | *(your choice)* | 5432  |
+
+---
+
+## 3. Communication
+
+### Inter-service Communication Matrix
+
+| From → To     | Service A | Service B | Gateway | Database |
+|---------------|-----------|-----------|---------|----------|
+| **Frontend**  |           |           |         |          |
+| **Gateway**   |           |           |         |          |
+| **Service A** |           |           |         |          |
+| **Service B** |           |           |         |          |
+
+---
+
+## 4. Architecture Diagram
+
+> Place diagrams in `docs/asset/` and reference here.
 
 ```mermaid
-flowchart LR
-    FE[Frontend :3000] --> GW[Gateway Nginx :8080]
-    GW --> US[user-service :8001]
-    GW --> RS[restaurant-service :8002]
-    GW --> MS[menu-service :8003]
-    GW --> OS[order-service :8004]
-
-    US --> UDB[(User DB)]
-    RS --> RDB[(Restaurant DB)]
-    MS --> MDB[(Menu DB)]
-    OS --> ODB[(Order DB)]
+graph LR
+    U[User] --> FE[Frontend]
+    FE --> GW[API Gateway]
+    GW --> SA[Service A]
+    GW --> SB[Service B]
+    SA --> DB1[(Database A)]
+    SB --> DB2[(Database B)]
 ```
+
+---
+
+## 5. Deployment
+
+- All services containerized with Docker
+- Orchestrated via Docker Compose
+- Single command: `docker compose up --build`
